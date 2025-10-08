@@ -1,0 +1,392 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+  <title>करेंट अफेयर्स</title>
+  <style>
+    :root{
+      --bg:#f7f7fb;
+      --card:#ffffff;
+      --text:#222;
+      --muted:#6b7280;
+      --accent:#2563eb;
+      --ok:#16a34a;
+      --bad:#dc2626;
+      --border:#e5e7eb;
+      --radius:14px;
+      --space:14px;
+
+      /* Base font sizes (mobile-first) */
+      --fs-body:18px;
+      --fs-label:18px;
+      --fs-h1:26px;
+      --fs-brand:30px; /* ~2pt (≈2.66px) बड़ा than h1 */
+      --fs-btn:18px;
+    }
+    @media (min-width:480px){
+      :root{
+        --fs-body:18px;
+        --fs-label:19px;
+        --fs-h1:28px;
+        --fs-brand:32px;
+        --fs-btn:18px;
+      }
+    }
+    @media (min-width:768px){
+      :root{
+        --fs-body:18px;
+        --fs-label:20px;
+        --fs-h1:30px;
+        --fs-brand:34px;
+        --fs-btn:18px;
+      }
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      padding:20px 14px 100px;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.5;
+      font-size:var(--fs-body);
+    }
+    .brand{
+      text-align:center;
+      font-weight:800;
+      color:#ef4444; /* red */
+      font-size:var(--fs-brand);
+      letter-spacing:.2px;
+    }
+    .telegram{
+      text-align:center;
+      margin:8px 0 14px;
+    }
+    .telegram a{
+      display:inline-block;
+      text-decoration:none;
+      font-weight:600;
+      font-size:18px;
+      color:#0ea5e9;
+    }
+    h1{
+      text-align:center;
+      font-size:var(--fs-h1);
+      margin:8px 0 18px;
+      color:#111827;
+    }
+
+    .quiz-container{
+      max-width:980px;
+      margin:0 auto;
+      display:grid;
+      gap:16px;
+    }
+    .question{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:0 2px 10px rgba(0,0,0,.05);
+    }
+    .q-title{
+      font-weight:700;
+      margin:0 0 10px;
+    }
+
+    .options{
+      display:flex;
+      flex-direction:column;
+      gap:10px; /* vertical spacing line by line */
+    }
+
+    /* Each option as a separate box */
+    .options label.option{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px;
+      border:2px solid var(--border);
+      border-radius:12px;
+      background:#fbfbff;
+      cursor:pointer;
+      transition:all .15s ease;
+      font-size:var(--fs-label);
+      user-select:none;
+    }
+    .options label.option:hover{
+      border-color:#c7d2fe;
+      background:#f5f7ff;
+    }
+
+    /* Bigger radio for mobile */
+    .options input[type="radio"]{
+      appearance:none;
+      width:26px;
+      height:26px;
+      min-width:26px;
+      min-height:26px;
+      border:2px solid #9ca3af;
+      border-radius:50%;
+      display:inline-block;
+      position:relative;
+      outline:none;
+      transition:border-color .15s ease, box-shadow .15s ease;
+      background:#fff;
+    }
+    .options input[type="radio"]:checked{
+      border-color:var(--accent);
+      box-shadow:0 0 0 4px rgba(37,99,235,.15);
+    }
+    .options input[type="radio"]::after{
+      content:"";
+      position:absolute;
+      inset:5px;
+      border-radius:50%;
+      background:transparent;
+      transition:background .15s ease;
+    }
+    .options input[type="radio"]:checked::after{
+      background:var(--accent);
+    }
+
+    /* Correct/Incorrect colors */
+    .option.correct{
+      background:#dcfce7 !important;
+      border-color:var(--ok) !important;
+    }
+    .option.incorrect{
+      background:#fee2e2 !important;
+      border-color:var(--bad) !important;
+    }
+
+    /* Buttons row (submit + restart) */
+    .actions{
+      position:sticky;
+      bottom:0;
+      left:0; right:0;
+      background:rgba(247,247,251,.85);
+      backdrop-filter: blur(6px);
+      border-top:1px solid var(--border);
+      padding:12px 10px;
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      z-index:5;
+    }
+    .btn{
+      border:0;
+      border-radius:999px;
+      padding:12px 18px;
+      font-weight:700;
+      font-size:var(--fs-btn);
+      cursor:pointer;
+      box-shadow:0 4px 14px rgba(0,0,0,.08);
+    }
+    .btn-submit{ background:#22c55e; color:#fff; }
+    .btn-restart{ background:#ef4444; color:#fff; }
+
+    /* Score modal */
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.4);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:50;
+    }
+    .modal .card{
+      background:#fff;
+      border-radius:18px;
+      padding:24px;
+      width:min(520px, 96vw);
+      text-align:center;
+      box-shadow:0 10px 30px rgba(0,0,0,.2);
+    }
+    .score{
+      font-size:28px;
+      font-weight:800;
+      margin:8px 0 2px;
+      color:#111827;
+    }
+    .note{
+      font-size:16px;
+      color:var(--muted);
+      margin-bottom:14px;
+    }
+    .modal .btn{
+      width:100%;
+    }
+    .sr-only{
+      position:absolute!important;
+      height:1px;width:1px;
+      overflow:hidden;clip:rect(1px,1px,1px,1px);
+      white-space:nowrap;border:0;padding:0;margin:-1px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="brand">Deepu Raj Current Affairs</div>
+  <div class="telegram">
+    <a href="https://t.me/testexamdk" target="_blank" rel="noopener">Click here to Join our Telegram Channel</a><br>
+	<a href="http://www.youtube.com/@CurrentAffirs474" target="_blank" rel="noopener">Click here to Join our youtube Channel</a>
+  </div>
+  <h1> 08 अगस्‍त 2025 करेंट अफेयर्स </h1>
+
+  <div class="quiz-container" id="quiz" aria-live="polite"></div>
+
+  <div class="actions">
+    <button class="btn btn-submit" id="submitBtn">Submit</button>
+    <button class="btn btn-restart" id="restartBtn">Restart</button>
+  </div>
+
+  <!-- Score Modal -->
+  <div class="modal" id="scoreModal" role="dialog" aria-modal="true" aria-labelledby="scoreTitle" aria-describedby="scoreDesc">
+    <div class="card">
+      <div id="scoreTitle" class="score">आपका स्कोर</div>
+      <div id="scoreDesc" class="note">—</div>
+      <button class="btn btn-restart" id="restartInModal">Restart</button>
+    </div>
+  </div>
+
+<script>
+/* =========================
+   55 Q&A DATA (from your list)
+   ========================= */
+const quizData = [
+  
+  {q:"1.प्रधानमंत्री जन धन योजना के लाभार्थियों की संख्‍या 4 अगस्‍त 2025 तक बढ़कर लगभग कितनी हो गई है?", o:[ "45.98 करोड़",  "50.98 करोड़", "55.98 करोड़", "65.98 करोड़"], a:2},
+  {q:"2.भारतीय रिजर्व बैंक का वित्तीय समावेशन सूचकांक, 2025 में बढ़कर कितना हो गया है ?", o:[ "60",  "63", "65", "67"], a:3 },
+  {q:"3.स्‍वतंत्रता संग्राम-सेनानियों के साहस को सम्‍मान देने के लिए प्रतिवर्ष किस तारीख को भारत छोड़ो आंदोलन दिवस मनाया जाता है?", o:[ "07 अगस्‍त को",  "08 अगस्‍त को", "09 अगस्‍त को", "10 अगस्‍त को"], a:0 },
+  {q:"4.टाटा मोटर्स ने किस देश के इवेको ग्रुप को 34600 करोड़ रूपये में खरीदा है?", o:[ "इटली",  "जर्मनी", "अमेरिका", "रूस"], a:0 },
+  {q:"5.हाल ही में परीक्षा पे चर्चा 2025 ने कितने करोड़ रजिस्‍ट्रेशन के ाथ वर्ल्‍ड रिकॉर्ड बनाया है?", o:[ "3.29",  "3.64", "3.53", "3.88"], a: 2},
+  {q:"6.हाल ही में किस राज्‍य ने उच्‍च शिक्षा में लड़कियों की सहायता के लिए 'निजुत मोइना 2.0 योजना' शुरू की है?", o:[ "असम",  "केरल", "मध्‍य प्रदेश", "बिहार"], a:0 },
+  {q:"7.हाल ही में किसने दिल्‍ली के कर्तव्‍य पथ पर कर्तव्‍य भवन-3 का उद्धाटन किया है?", o:[ "अमित शाह",  "राजनाथ सिंह", "पीयूष गोयल", "नरेंद्र मोदी"], a:3 },
+  {q:"8.हाल ही में WHO-IRCH कार्यशाला की मेजबानी कौन करेगा?", o:[ "रूस",  "भारत", "अमेरिका", "वियतनाम"], a: 1},
+  {q:"9.हाल ही में भारत और किस देश के बीच राजनायिक संबंधों के 75 साल पूरे हुए हैं?", o:[ "फ्रांस",  "जर्मनी", "फिलीपींस", "कम्‍बोडिया"], a:2 },
+  {q:"10.हाल ही में भारत का चाय उत्‍पादन जून में सालाना आधार पर कितने प्रतिशत घटकर 13.35 करोड़ किलोग्राम रह गया है?", o:[ "07%",  "09%", "08%", "10%"], a: 1},
+  {q:"11.हाल ही में इंटर्नशिप योजना के दूसरे चरण में महिला भागीदारी बढ़कर कितने प्रतिशत हुई है?", o:[ "31%",  "21%", "51%", "41%"], a:3},
+  {q:"12.हाल ही में सब-जूनियर (अंडर-15) राष्‍ट्रीय मुककेबाजी चैंपियनशिप का आयोजन कहॉं हुआ है?", o:[ "मुंबई",  "नई दिल्‍ली", "ग्रेटर नोएडा", "भोपाल"], a:2 },
+  {q:"13.हाल ही में फिच रेटिंग्‍स ने वित्त वर्ष 26 के लिए भारत की जीडीपी वृद्धि दर कितने प्रतिशत रहने का अनुमान लगाया है?", o:[ "6.1 प्रतिश्‍त",  "6.3 प्रतिशत", "6.9 प्रतिशत", "6.6 प्रतिशत"], a:1 },
+  {q:"14.हाल ही में बिहार का नया मुख्‍य सचिव नियुक्‍त किया गया है?", o:[ "पुष्‍पेन्‍द्र सिंह",  "प्रत्‍यय अमृत", "संजय वात्‍स्‍यायन", "अजय कुमार भल्‍ला"], a:1 },
+  {q:"15.हाल ही में कौन सा देश अंतर्राष्‍ट्रीय सौर गठबंधन का 107वां सदस्‍य देश बना है?", o:[ "यूक्रेन",  "कनाडा", "मॉल्‍डोव", "चीन"], a:2 },
+  
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+  
+];
+
+/* ================
+   Build the quiz UI
+   ================ */
+const quizEl = document.getElementById("quiz");
+
+quizData.forEach((item, qi)=>{
+  const card = document.createElement("div");
+  card.className = "question";
+  const title = document.createElement("p");
+  title.className = "q-title";
+  title.innerText = item.q;
+  const opts = document.createElement("div");
+  opts.className = "options";
+  item.o.forEach((opt, oi)=>{
+    const id = `q${qi}-o${oi}`;
+    const label = document.createElement("label");
+    label.className = "option";
+    label.setAttribute("for", id);
+
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.id = id;
+    input.name = `q${qi}`;
+    input.value = oi;
+
+    const span = document.createElement("span");
+    span.textContent = opt;
+
+    label.appendChild(input);
+    label.appendChild(span);
+    opts.appendChild(label);
+
+    // Immediate feedback
+    input.addEventListener("change", ()=>{
+      // clear old marks
+      opts.querySelectorAll(".option").forEach(l=>{
+        l.classList.remove("correct","incorrect");
+      });
+      // mark selected
+      if(oi === item.a){
+        label.classList.add("correct");
+      }else{
+        label.classList.add("incorrect");
+        // also show correct one
+        const correctLabel = opts.children[item.a];
+        correctLabel.classList.add("correct");
+      }
+    });
+  });
+
+  card.appendChild(title);
+  card.appendChild(opts);
+  quizEl.appendChild(card);
+});
+
+/* ===========
+   Actions
+   =========== */
+const submitBtn = document.getElementById("submitBtn");
+const restartBtn = document.getElementById("restartBtn");
+const scoreModal = document.getElementById("scoreModal");
+const scoreTitle = document.getElementById("scoreTitle");
+const scoreDesc = document.getElementById("scoreDesc");
+const restartInModal = document.getElementById("restartInModal");
+
+submitBtn.addEventListener("click", ()=>{
+  let score = 0;
+  quizData.forEach((item, qi)=>{
+    const checked = document.querySelector(`input[name="q${qi}"]:checked`);
+    if(checked && Number(checked.value) === item.a) score++;
+  });
+  scoreTitle.textContent = `आपका स्कोर: ${score}/${quizData.length}`;
+  const pct = Math.round((score/quizData.length)*100);
+  scoreDesc.textContent = `सही उत्तर: ${score} • प्रतिशत: ${pct}%`;
+  scoreModal.style.display = "flex";
+});
+
+function restartQuiz(){
+  // Uncheck all
+  document.querySelectorAll('input[type="radio"]').forEach(r=>{ r.checked = false; });
+  // Remove correctness classes
+  document.querySelectorAll('.option').forEach(l=> l.classList.remove('correct','incorrect'));
+  // Hide modal if open
+  scoreModal.style.display = "none";
+  // Scroll to top for fresh start
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+restartBtn.addEventListener("click", restartQuiz);
+restartInModal.addEventListener("click", restartQuiz);
+
+// Close modal by clicking backdrop (outside card)
+scoreModal.addEventListener("click", (e)=>{
+  if(e.target === scoreModal) scoreModal.style.display = "none";
+});
+</script>
+</body>
+</html>
